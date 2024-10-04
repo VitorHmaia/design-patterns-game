@@ -44,6 +44,6 @@ func MonsterFactory(monsterType string) (Monster, error) {
     case "Zombie":
         return &Zombie{health: 150}, nil
     default:
-        return nil, fmt.Errorf("Invalid monster type")
+        return nil, fmt.Errorf("Invalid monster type: %s", monsterType)
     }
 }

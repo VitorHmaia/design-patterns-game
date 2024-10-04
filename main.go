@@ -17,32 +17,37 @@ type Player struct {
     IsAlive bool
 }
 
-// Function to select action
+// Function to select action with validation
 func selectAction() string {
     var action string
-    fmt.Println("Escolha sua ação (atacar, defender, habilidade):")
-    fmt.Scan(&action)
-    return action
+    for {
+        fmt.Println("Escolha sua ação (atacar, defender, habilidade):")
+        fmt.Scan(&action)
+        
+        if action == "atacar" || action == "defender" || action == "habilidade" {
+            return action
+        }
+        fmt.Println("Ação inválida. Por favor, escolha uma ação válida.")
+    }
 }
 
-// Function to select an opponent in PvP
+// Function to select an opponent in PvP with validation
 func selectOpponent(players []Player, currentPlayerIndex int) *Player {
-    fmt.Println("Escolha um oponente para atacar:")
-    for i, player := range players {
-        if i != currentPlayerIndex && player.IsAlive {
-            fmt.Printf("%d - %s (Vida: %d)\n", i, player.Name, player.Monster.Health())
-        }
-    }
-
     var opponentIndex int
-    fmt.Scan(&opponentIndex)
+    for {
+        fmt.Println("Escolha um oponente para atacar:")
+        for i, player := range players {
+            if i != currentPlayerIndex && player.IsAlive {
+                fmt.Printf("%d - %s (Vida: %d)\n", i, player.Name, player.Monster.Health())
+            }
+        }
 
-    if opponentIndex == currentPlayerIndex || !players[opponentIndex].IsAlive {
+        fmt.Scan(&opponentIndex)
+        if opponentIndex >= 0 && opponentIndex < len(players) && opponentIndex != currentPlayerIndex && players[opponentIndex].IsAlive {
+            return &players[opponentIndex]
+        }
         fmt.Println("Escolha inválida, tente novamente.")
-        return selectOpponent(players, currentPlayerIndex)
     }
-
-    return &players[opponentIndex]
 }
 
 // Function to execute turn
@@ -84,8 +89,17 @@ func main() {
     rand.Seed(time.Now().UnixNano())
 
     var mode string
-    fmt.Println("Escolha o modo de jogo: PvP ou PvE")
-    fmt.Scan(&mode)
+    // Loop de validação para modo de jogo
+    for {
+        fmt.Println("Escolha o modo de jogo: PvP ou PvE")
+        fmt.Scan(&mode)
+
+        if mode == "PvP" || mode == "PvE" {
+            break
+        } else {
+            fmt.Println("Modo inválido, escolha PvP ou PvE.")
+        }
+    }
 
     if mode == "PvP" {
         // Configura jogadores
@@ -102,7 +116,14 @@ func main() {
             fmt.Printf("Escolha seu monstro (Dragon, Zombie): ")
             fmt.Scan(&monsterType)
 
-            monster, _ := factory.MonsterFactory(monsterType)
+            // Tratamento de erro ao criar o monstro
+            monster, err := factory.MonsterFactory(monsterType)
+            if err != nil {
+                fmt.Println("Tipo de monstro inválido. Tente novamente.")
+                i--
+                continue
+            }
+
             players[i] = Player{Name: name, Monster: monster, IsAlive: true}
         }
 
@@ -159,7 +180,13 @@ func main() {
         fmt.Println("Escolha seu monstro (Dragon, Zombie):")
         fmt.Scan(&monsterType)
 
-        playerMonster, _ := factory.MonsterFactory(monsterType)
+        // Tratamento de erro ao criar o monstro
+        playerMonster, err := factory.MonsterFactory(monsterType)
+        if err != nil {
+            fmt.Println("Tipo de monstro inválido. Encerrando o jogo.")
+            return
+        }
+
         player := Player{Name: playerName, Monster: playerMonster, IsAlive: true}
 
         // Configura o bot
@@ -202,7 +229,5 @@ func main() {
 
             round++
         }
-    } else {
-        fmt.Println("Modo inválido, escolha PvP ou PvE.")
     }
 }
