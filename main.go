@@ -79,8 +79,23 @@ func executeTurn(player *Player, opponent *Player, action string) {
     }
 }
 
-// Function for bot action in PvE
-func botAction() string {
+// Bot action function with improved intelligence
+func botAction(bot *Player, player *Player) string {
+    // If the bot's health is below 30, it has a higher chance of defending or using abilities
+    if bot.Monster.Health() < 30 {
+        if rand.Float32() < 0.5 {
+            return "defender"
+        } else {
+            return "habilidade"
+        }
+    }
+
+    // If player's health is low, bot aggressively attacks
+    if player.Monster.Health() < 50 {
+        return "atacar"
+    }
+
+    // Randomized but with a more intelligent approach based on health levels
     actions := []string{"atacar", "defender", "habilidade"}
     return actions[rand.Intn(len(actions))]
 }
@@ -170,7 +185,7 @@ func main() {
                 }
             }
 
-            round++
+            round++ 
         }
     } else if mode == "PvE" {
         // Configura PvE
@@ -219,7 +234,7 @@ func main() {
 
             // Turno do bot
             fmt.Printf("Turno do %s!\n", bot.Name)
-            botAct := botAction()
+            botAct := botAction(&bot, &player)
             executeTurn(&bot, &player, botAct)
 
             if player.Monster.Health() <= 0 {
