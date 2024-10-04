@@ -58,6 +58,10 @@ func executeTurn(player *Player, opponent *Player, action string) {
     defendStrategy := &strategy.DefendStrategy{}
     specialStrategy := &strategy.SpecialAbilityStrategy{}
 
+    // Separador visual
+    fmt.Println("\n-------------------------------")
+    fmt.Printf("Ação de %s: %s\n", player.Name, action)
+
     switch action {
     case "atacar":
         attackStrategy.Execute(player.Monster, opponent.Monster)
@@ -72,11 +76,20 @@ func executeTurn(player *Player, opponent *Player, action string) {
     // Notificar mudança de estado
     gameObserver.Update(opponent.Monster)
 
+    // Exibe o status após a ação
+    fmt.Printf("%s agora tem %d de vida.\n", opponent.Name, opponent.Monster.Health())
+
     // Verifica se o oponente perdeu
     if opponent.Monster.Health() <= 0 {
         fmt.Printf("%s foi derrotado!\n", opponent.Name)
         opponent.IsAlive = false
     }
+
+    // Mais um separador visual
+    fmt.Println("-------------------------------\n")
+    
+    // Pause para permitir a leitura
+    time.Sleep(500 * time.Millisecond) // Espera meio segundo
 }
 
 // Bot action function with improved intelligence
