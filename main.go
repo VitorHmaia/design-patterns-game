@@ -94,6 +94,12 @@ func botAction() string {
     return actions[rand.Intn(len(actions))]
 }
 
+// Function to display victory message
+func displayVictoryMessage(playerName string) {
+    fmt.Printf("Parabéns, %s! Você demonstrou uma força impressionante e dominou a batalha!\n", playerName)
+    fmt.Println("Você é o grande campeão!")
+}
+
 func main() {
     rand.Seed(time.Now().UnixNano())
 
@@ -151,7 +157,7 @@ func main() {
             if alivePlayers <= 1 {
                 for _, player := range players {
                     if player.IsAlive {
-                        fmt.Printf("%s venceu a batalha!\n", player.Name)
+                        displayVictoryMessage(player.Name)
                         gameManager.AddScore(100)
                         return
                     }
@@ -222,7 +228,7 @@ func main() {
             executeTurn(&player, &bot, action)
 
             if bot.Monster.Health() <= 0 {
-                fmt.Printf("%s venceu a batalha contra o Bot!\n", player.Name)
+                displayVictoryMessage(player.Name)
                 gameManager.AddScore(100)
                 return
             }
@@ -233,7 +239,7 @@ func main() {
             executeTurn(&bot, &player, botAct)
 
             if player.Monster.Health() <= 0 {
-                fmt.Println("O Bot venceu a batalha!")
+                fmt.Println("O Bot venceu a batalha! Tente novamente para melhorar sua estratégia.")
                 return
             }
 
