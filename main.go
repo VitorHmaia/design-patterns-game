@@ -19,10 +19,24 @@ type Player struct {
 
 // Function to select action
 func selectAction() string {
-    var action string
-    fmt.Println("Escolha sua ação (atacar, defender, habilidade):")
-    fmt.Scan(&action)
-    return action
+    var actionNumber int
+    fmt.Println("Escolha sua ação:")
+    fmt.Println("1 - Atacar")
+    fmt.Println("2 - Defender")
+    fmt.Println("3 - Habilidade")
+
+    fmt.Scan(&actionNumber)
+    switch actionNumber {
+    case 1:
+        return "atacar"
+    case 2:
+        return "defender"
+    case 3:
+        return "habilidade"
+    default:
+        fmt.Println("Ação inválida, escolha novamente.")
+        return selectAction()
+    }
 }
 
 // Function to select an opponent in PvP
@@ -83,11 +97,13 @@ func botAction() string {
 func main() {
     rand.Seed(time.Now().UnixNano())
 
-    var mode string
-    fmt.Println("Escolha o modo de jogo: PvP ou PvE")
+    var mode int
+    fmt.Println("Escolha o modo de jogo:")
+    fmt.Println("1 - PvP")
+    fmt.Println("2 - PvE")
     fmt.Scan(&mode)
 
-    if mode == "PvP" {
+    if mode == 1 {
         // Configura jogadores
         var numPlayers int
         fmt.Println("Quantos jogadores?")
@@ -99,8 +115,18 @@ func main() {
             var name, monsterType string
             fmt.Printf("Nome do jogador %d: ", i+1)
             fmt.Scan(&name)
-            fmt.Printf("Escolha seu monstro (Dragon, Zombie): ")
-            fmt.Scan(&monsterType)
+            fmt.Println("Escolha seu monstro:")
+            fmt.Println("1 - Dragon")
+            fmt.Println("2 - Zombie")
+            
+            var monsterChoice int
+            fmt.Scan(&monsterChoice)
+
+            if monsterChoice == 1 {
+                monsterType = "Dragon"
+            } else {
+                monsterType = "Zombie"
+            }
 
             monster, _ := factory.MonsterFactory(monsterType)
             players[i] = Player{Name: name, Monster: monster, IsAlive: true}
@@ -151,13 +177,24 @@ func main() {
 
             round++
         }
-    } else if mode == "PvE" {
+    } else if mode == 2 {
         // Configura PvE
         var playerName, monsterType string
         fmt.Println("Digite seu nome:")
         fmt.Scan(&playerName)
-        fmt.Println("Escolha seu monstro (Dragon, Zombie):")
-        fmt.Scan(&monsterType)
+        
+        fmt.Println("Escolha seu monstro:")
+        fmt.Println("1 - Dragon")
+        fmt.Println("2 - Zombie")
+        
+        var monsterChoice int
+        fmt.Scan(&monsterChoice)
+        
+        if monsterChoice == 1 {
+            monsterType = "Dragon"
+        } else {
+            monsterType = "Zombie"
+        }
 
         playerMonster, _ := factory.MonsterFactory(monsterType)
         player := Player{Name: playerName, Monster: playerMonster, IsAlive: true}
@@ -203,6 +240,6 @@ func main() {
             round++
         }
     } else {
-        fmt.Println("Modo inválido, escolha PvP ou PvE.")
+        fmt.Println("Modo inválido, escolha 1 para PvP ou 2 para PvE.")
     }
 }
