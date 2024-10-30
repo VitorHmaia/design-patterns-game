@@ -17,7 +17,7 @@ type Player struct {
     IsAlive bool
 }
 
-// Function to select action
+// Function to select action with validation
 func selectAction() string {
     var actionNumber int
     fmt.Println("Escolha sua ação:")
@@ -39,24 +39,23 @@ func selectAction() string {
     }
 }
 
-// Function to select an opponent in PvP
+// Function to select an opponent in PvP with validation
 func selectOpponent(players []Player, currentPlayerIndex int) *Player {
-    fmt.Println("Escolha um oponente para atacar:")
-    for i, player := range players {
-        if i != currentPlayerIndex && player.IsAlive {
-            fmt.Printf("%d - %s (Vida: %d)\n", i, player.Name, player.Monster.Health())
-        }
-    }
-
     var opponentIndex int
-    fmt.Scan(&opponentIndex)
+    for {
+        fmt.Println("Escolha um oponente para atacar:")
+        for i, player := range players {
+            if i != currentPlayerIndex && player.IsAlive {
+                fmt.Printf("%d - %s (Vida: %d)\n", i, player.Name, player.Monster.Health())
+            }
+        }
 
-    if opponentIndex == currentPlayerIndex || !players[opponentIndex].IsAlive {
+        fmt.Scan(&opponentIndex)
+        if opponentIndex >= 0 && opponentIndex < len(players) && opponentIndex != currentPlayerIndex && players[opponentIndex].IsAlive {
+            return &players[opponentIndex]
+        }
         fmt.Println("Escolha inválida, tente novamente.")
-        return selectOpponent(players, currentPlayerIndex)
     }
-
-    return &players[opponentIndex]
 }
 
 // Function to execute turn
@@ -66,6 +65,10 @@ func executeTurn(player *Player, opponent *Player, action string) {
     attackStrategy := &strategy.AttackStrategy{}
     defendStrategy := &strategy.DefendStrategy{}
     specialStrategy := &strategy.SpecialAbilityStrategy{}
+
+    // Separador visual
+    fmt.Println("\n-------------------------------")
+    fmt.Printf("Ação de %s: %s\n", player.Name, action)
 
     switch action {
     case "atacar":
@@ -81,15 +84,39 @@ func executeTurn(player *Player, opponent *Player, action string) {
     // Notificar mudança de estado
     gameObserver.Update(opponent.Monster)
 
+    // Exibe o status após a ação
+    fmt.Printf("%s agora tem %d de vida.\n", opponent.Name, opponent.Monster.Health())
+
     // Verifica se o oponente perdeu
     if opponent.Monster.Health() <= 0 {
         fmt.Printf("%s foi derrotado!\n", opponent.Name)
         opponent.IsAlive = false
     }
+
+    // Mais um separador visual
+    fmt.Println("-------------------------------\n")
+    
+    // Pause para permitir a leitura
+    time.Sleep(500 * time.Millisecond) // Espera meio segundo
 }
 
-// Function for bot action in PvE
-func botAction() string {
+// Bot action function with improved intelligence
+func botAction(bot *Player, player *Player) string {
+    // If the bot's health is below 30, it has a higher chance of defending or using abilities
+    if bot.Monster.Health() < 30 {
+        if rand.Float32() < 0.5 {
+            return "defender"
+        } else {
+            return "habilidade"
+        }
+    }
+
+    // If player's health is low, bot aggressively attacks
+    if player.Monster.Health() < 50 {
+        return "atacar"
+    }
+
+    // Randomized but with a more intelligent approach based on health levels
     actions := []string{"atacar", "defender", "habilidade"}
     return actions[rand.Intn(len(actions))]
 }
@@ -181,7 +208,7 @@ func main() {
                 }
             }
 
-            round++
+            round++ 
         }
     } else if mode == 2 {
         // Configura PvE
@@ -235,7 +262,7 @@ func main() {
 
             // Turno do bot
             fmt.Printf("Turno do %s!\n", bot.Name)
-            botAct := botAction()
+            botAct := botAction(&bot, &player)
             executeTurn(&bot, &player, botAct)
 
             if player.Monster.Health() <= 0 {
